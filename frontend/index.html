@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pump Watch</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&display=swap">
+<style>
+/* Layout: control-room panel. Left: live fault check sliders. Right: simulated sensor scatter. Below: pump test bench table + efficiency bars. */
+:root {
+  --bg: #eef1f4; --panel: #ffffff; --ink: #14202b; --muted: #5b6b79; --line: #d3dae1;
+  --accent: #0b6e8a; --ok: #1f8a4c; --fault: #c8341f; --warn: #b7791f;
+  --display: "Space Grotesk", system-ui, sans-serif; --body: "Inter", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e151b; --panel: #16212a; --ink: #e6edf2; --muted: #8fa1b0; --line: #2a3945;
+  --accent: #4fc3df; --ok: #4cc47f; --fault: #ff6b55; --warn: #e3a94a; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0e151b; --panel: #16212a; --ink: #e6edf2; --muted: #8fa1b0; --line: #2a3945;
+  --accent: #4fc3df; --ok: #4cc47f; --fault: #ff6b55; --warn: #e3a94a; color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); padding-block: 24px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1 { font-family: var(--display); font-size: clamp(1.7rem, 4vw, 2.4rem); margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: 1.1rem; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 65ch; line-height: 1.5; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 18px; min-width: 0; }
+.status { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-weight: 500; padding: 12px 14px; border-radius: 4px; margin: 10px 0 16px; border: 1px solid; }
+.status.ok { color: var(--ok); border-color: var(--ok); } .status.bad { color: var(--fault); border-color: var(--fault); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; flex: none; }
+.ctl { margin-bottom: 14px; }
+.ctl label { display: flex; justify-content: space-between; gap: 8px; font-size: .85rem; margin-bottom: 4px; flex-wrap: wrap; }
+.ctl .val { font-family: var(--mono); }
+.ctl .rule { color: var(--muted); font-family: var(--mono); font-size: .75rem; }
+.ctl.tripped .val { color: var(--fault); }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+button { font: inherit; font-size: .85rem; background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stats { display: flex; gap: 20px; flex-wrap: wrap; font-family: var(--mono); font-size: .85rem; color: var(--muted); margin-bottom: 8px; }
+.stats b { color: var(--ink); font-weight: 500; }
+canvas { width: 100%; height: auto; display: block; }
+.legend { display: flex; gap: 16px; font-size: .8rem; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: .8rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-weight: 500; font-family: var(--body); font-size: .75rem; }
+.bar { height: 8px; background: var(--accent); border-radius: 2px; min-width: 2px; }
+.barcell { width: 120px; }
+footer { color: var(--muted); font-size: .8rem; }
+body { margin: 0; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Pump Watch</h1>
+    <p class="sub">Centrifugal pump fault check. Move the sensor sliders to see when the monitoring rules from the pump project flag a fault, then browse the simulated fleet and the bench test results.</p>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="live">
+      <h2 id="live">Live fault check</h2>
+      <div id="status" class="status ok" role="status"><span class="dot"></span><span id="statusText">Healthy</span></div>
+      <div id="controls"></div>
+      <button id="rand" type="button">Load random reading</button>
+    </section>
+
+    <section class="panel" aria-labelledby="fleet">
+      <h2 id="fleet">Simulated readings</h2>
+      <div class="stats"><span>Samples <b id="n">1000</b></span><span>Faults <b id="nf">0</b></span><span>Rate <b id="rate">0%</b></span></div>
+      <canvas id="scatter" width="560" height="380" aria-label="Scatter of pressure against temperature, faults highlighted"></canvas>
+      <div class="legend"><span><i style="background:var(--accent)"></i>Normal</span><span><i style="background:var(--fault)"></i>Fault</span><span>Your reading is the ringed point</span></div>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="bench">
+    <h2 id="bench">Bench test results</h2>
+    <p class="sub" style="margin-bottom:12px">Nine runs of the demo pump, from the project's test table.</p>
+    <div class="scroll"><table id="tbl"></table></div>
+  </section>
+
+  <footer>Thresholds match the project's data_loader.py. Readings are simulated in the browser.</footer>
+</div>
+
+<script>
+const SENSORS = [
+  { k: 'vibration', name: 'Vibration', unit: 'mm/s', min: -4, max: 4, step: .05, v: 0, rule: '> 1.5', trip: v => v > 1.5 },
+  { k: 'pressure', name: 'Pressure', unit: 'kPa', min: 60, max: 140, step: .5, v: 100, rule: '< 85', trip: v => v < 85 },
+  { k: 'temperature', name: 'Temperature', unit: '°C', min: 55, max: 100, step: .5, v: 75, rule: '> 85', trip: v => v > 85 },
+  { k: 'flow_rate', name: 'Flow rate', unit: 'lpm', min: 15, max: 45, step: .25, v: 30, rule: '< 25', trip: v => v < 25 },
+];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// Seeded generator (mulberry32 + Box-Muller) so the fleet looks the same on every visit
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const rand = rng(42);
+const gauss = (m, s) => m + s * Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(2 * Math.PI * rand());
+const isFault = r => SENSORS.some(s => s.trip(r[s.k]));
+const data = Array.from({ length: 1000 }, () => { const r = { vibration: gauss(0, 1), pressure: gauss(100, 10), temperature: gauss(75, 5), flow_rate: gauss(30, 3) }; r.fault = isFault(r); return r; });
+
+const box = document.getElementById('controls');
+SENSORS.forEach(s => {
+  box.insertAdjacentHTML('beforeend', `<div class="ctl" id="c_${s.k}"><label for="r_${s.k}"><span>${s.name}</span><span class="rule">fault if ${s.rule}</span><span class="val" id="v_${s.k}"></span></label><input type="range" id="r_${s.k}" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.v}"></div>`);
+  document.getElementById('r_' + s.k).addEventListener('input', e => { s.v = +e.target.value; update(); });
+});
+
+function update() {
+  let tripped = [];
+  SENSORS.forEach(s => {
+    document.getElementById('v_' + s.k).textContent = s.v.toFixed(s.step < 1 ? 2 : 1) + ' ' + s.unit;
+    const t = s.trip(s.v); document.getElementById('c_' + s.k).classList.toggle('tripped', t); if (t) tripped.push(s.name.toLowerCase());
+  });
+  const st = document.getElementById('status'); st.className = 'status ' + (tripped.length ? 'bad' : 'ok');
+  document.getElementById('statusText').textContent = tripped.length ? 'Fault: ' + tripped.join(', ') : 'Healthy';
+  draw();
+}
+
+function draw() {
+  const c = document.getElementById('scatter'), x = c.getContext('2d'), W = c.width, H = c.height, m = { l: 48, r: 14, t: 12, b: 40 };
+  const px = t => m.l + (t - 55) / 45 * (W - m.l - m.r), py = p => H - m.b - (p - 60) / 80 * (H - m.t - m.b);
+  x.clearRect(0, 0, W, H); x.font = '12px ' + css('--mono'); x.fillStyle = css('--muted'); x.strokeStyle = css('--line'); x.lineWidth = 1;
+  for (let t = 55; t <= 100; t += 15) { x.beginPath(); x.moveTo(px(t), m.t); x.lineTo(px(t), H - m.b); x.stroke(); x.textAlign = 'center'; x.fillText(t, px(t), H - m.b + 16); }
+  for (let p = 60; p <= 140; p += 20) { x.beginPath(); x.moveTo(m.l, py(p)); x.lineTo(W - m.r, py(p)); x.stroke(); x.textAlign = 'right'; x.fillText(p, m.l - 6, py(p) + 4); }
+  x.textAlign = 'center'; x.fillText('Temperature (°C)', (W + m.l) / 2, H - 6);
+  x.save(); x.translate(12, (H - m.b) / 2); x.rotate(-Math.PI / 2); x.fillText('Pressure (kPa)', 0, 0); x.restore();
+  // threshold guides
+  x.strokeStyle = css('--warn'); x.setLineDash([5, 4]);
+  x.beginPath(); x.moveTo(px(85), m.t); x.lineTo(px(85), H - m.b); x.stroke();
+  x.beginPath(); x.moveTo(m.l, py(85)); x.lineTo(W - m.r, py(85)); x.stroke(); x.setLineDash([]);
+  [false, true].forEach(f => { x.fillStyle = css(f ? '--fault' : '--accent'); x.globalAlpha = f ? .75 : .45;
+    data.forEach(d => { if (d.fault !== f) return; x.beginPath(); x.arc(px(d.temperature), py(d.pressure), 2.6, 0, 7); x.fill(); }); });
+  x.globalAlpha = 1;
+  const cur = SENSORS.reduce((o, s) => (o[s.k] = s.v, o), {}), bad = isFault(cur);
+  x.beginPath(); x.arc(px(cur.temperature), py(cur.pressure), 8, 0, 7); x.lineWidth = 2.5; x.strokeStyle = css(bad ? '--fault' : '--ok'); x.fillStyle = css('--panel'); x.fill(); x.stroke();
+}
+
+const nf = data.filter(d => d.fault).length;
+document.getElementById('nf').textContent = nf; document.getElementById('rate').textContent = (nf / data.length * 100).toFixed(1) + '%';
+document.getElementById('rand').addEventListener('click', () => { const r = data[Math.floor(Math.random() * data.length)]; SENSORS.forEach(s => { s.v = Math.min(s.max, Math.max(s.min, r[s.k])); document.getElementById('r_' + s.k).value = s.v; }); update(); });
+
+const bench = [[860,24.01,26.11,14.73,0.288,32.4],[830,25.68,26.66,14.31,0.325,29.5],[800,26.5,25.0,16.89,0.261,26.5],[200,26.66,24.88,16.5,0.26,24.0],[200,29.61,20.44,16.49,0.308,20.4],[200,30.51,19.44,16.35,0.213,20.0],[160,13.81,18.89,15.81,0.238,23.9],[140,13.35,18.01,15.13,0.233,24.4],[40,12.19,17.43,14.49,0.291,20.5]];
+document.getElementById('tbl').innerHTML = '<tr><th>Run</th><th>Suction (mm Hg)</th><th>Discharge head (m)</th><th>Total head (m)</th><th>Flow (lpm)</th><th>Power (kW)</th><th>Efficiency (%)</th><th></th></tr>' +
+  bench.map((r, i) => `<tr><td>${i + 1}</td><td>${r[0]}</td><td>${r[1].toFixed(2)}</td><td>${r[2].toFixed(2)}</td><td>${r[3].toFixed(2)}</td><td>${r[4].toFixed(3)}</td><td>${r[5].toFixed(1)}</td><td class="barcell"><div class="bar" style="width:${r[5] / 32.4 * 100}%"></div></td></tr>`).join('');
+
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+update();
+</script>
+</body>
+</html>
