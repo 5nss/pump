@@ -1,0 +1,252 @@
+[
+ {
+  "input": {
+   "vibration": 1.73,
+   "pressure": 88.366,
+   "temperature": 79.635,
+   "flow_rate": 25.969
+  },
+  "risk": 0.1014,
+  "rul": 127.69
+ },
+ {
+  "input": {
+   "vibration": 0.631,
+   "pressure": 105.346,
+   "temperature": 68.418,
+   "flow_rate": 31.571
+  },
+  "risk": 0.0,
+  "rul": 386.02
+ },
+ {
+  "input": {
+   "vibration": 0.572,
+   "pressure": 101.247,
+   "temperature": 64.972,
+   "flow_rate": 31.096
+  },
+  "risk": 0.0,
+  "rul": 380.42
+ },
+ {
+  "input": {
+   "vibration": 2.797,
+   "pressure": 76.641,
+   "temperature": 89.189,
+   "flow_rate": 24.576
+  },
+  "risk": 0.9985,
+  "rul": 6.13
+ },
+ {
+  "input": {
+   "vibration": 0.466,
+   "pressure": 107.458,
+   "temperature": 68.18,
+   "flow_rate": 34.399
+  },
+  "risk": 0.0,
+  "rul": 456.16
+ },
+ {
+  "input": {
+   "vibration": 0.763,
+   "pressure": 99.842,
+   "temperature": 64.461,
+   "flow_rate": 30.464
+  },
+  "risk": 0.0,
+  "rul": 311.66
+ },
+ {
+  "input": {
+   "vibration": 0.468,
+   "pressure": 99.29,
+   "temperature": 69.313,
+   "flow_rate": 31.777
+  },
+  "risk": 0.0,
+  "rul": 352.92
+ },
+ {
+  "input": {
+   "vibration": 2.115,
+   "pressure": 86.979,
+   "temperature": 78.625,
+   "flow_rate": 28.26
+  },
+  "risk": 0.3732,
+  "rul": 80.54
+ },
+ {
+  "input": {
+   "vibration": 1.399,
+   "pressure": 95.023,
+   "temperature": 77.043,
+   "flow_rate": 30.333
+  },
+  "risk": 0.0,
+  "rul": 184.31
+ },
+ {
+  "input": {
+   "vibration": 0.274,
+   "pressure": 103.286,
+   "temperature": 62.796,
+   "flow_rate": 34.177
+  },
+  "risk": 0.0,
+  "rul": 441.93
+ },
+ {
+  "input": {
+   "vibration": 0.805,
+   "pressure": 100.676,
+   "temperature": 68.259,
+   "flow_rate": 30.778
+  },
+  "risk": 0.0,
+  "rul": 312.19
+ },
+ {
+  "input": {
+   "vibration": 0.165,
+   "pressure": 104.498,
+   "temperature": 65.974,
+   "flow_rate": 32.003
+  },
+  "risk": 0.0,
+  "rul": 490.22
+ },
+ {
+  "input": {
+   "vibration": 1.56,
+   "pressure": 86.771,
+   "temperature": 76.851,
+   "flow_rate": 27.368
+  },
+  "risk": 0.0,
+  "rul": 141.36
+ },
+ {
+  "input": {
+   "vibration": 0.567,
+   "pressure": 96.912,
+   "temperature": 66.225,
+   "flow_rate": 31.064
+  },
+  "risk": 0.0,
+  "rul": 299.93
+ },
+ {
+  "input": {
+   "vibration": 0.614,
+   "pressure": 103.558,
+   "temperature": 61.733,
+   "flow_rate": 33.6
+  },
+  "risk": 0.0,
+  "rul": 411.65
+ },
+ {
+  "input": {
+   "vibration": 2.937,
+   "pressure": 81.53,
+   "temperature": 85.533,
+   "flow_rate": 25.896
+  },
+  "risk": 0.9926,
+  "rul": 17.59
+ },
+ {
+  "input": {
+   "vibration": 0.56,
+   "pressure": 107.198,
+   "temperature": 63.838,
+   "flow_rate": 33.312
+  },
+  "risk": 0.0,
+  "rul": 500.93
+ },
+ {
+  "input": {
+   "vibration": 0.357,
+   "pressure": 100.322,
+   "temperature": 63.898,
+   "flow_rate": 32.625
+  },
+  "risk": 0.0,
+  "rul": 421.38
+ },
+ {
+  "input": {
+   "vibration": 0.1,
+   "pressure": 100.702,
+   "temperature": 60.746,
+   "flow_rate": 31.891
+  },
+  "risk": 0.0,
+  "rul": 468.22
+ },
+ {
+  "input": {
+   "vibration": 0.51,
+   "pressure": 99.823,
+   "temperature": 63.929,
+   "flow_rate": 30.767
+  },
+  "risk": 0.0,
+  "rul": 348.33
+ },
+ {
+  "input": {
+   "vibration": 0.488,
+   "pressure": 104.151,
+   "temperature": 66.984,
+   "flow_rate": 31.413
+  },
+  "risk": 0.0,
+  "rul": 439.33
+ },
+ {
+  "input": {
+   "vibration": 0.923,
+   "pressure": 97.588,
+   "temperature": 70.136,
+   "flow_rate": 31.256
+  },
+  "risk": 0.0,
+  "rul": 260.71
+ },
+ {
+  "input": {
+   "vibration": 1.545,
+   "pressure": 87.325,
+   "temperature": 78.292,
+   "flow_rate": 27.918
+  },
+  "risk": 0.0186,
+  "rul": 142.03
+ },
+ {
+  "input": {
+   "vibration": 2.55,
+   "pressure": 82.504,
+   "temperature": 91.099,
+   "flow_rate": 23.403
+  },
+  "risk": 0.9905,
+  "rul": 19.66
+ },
+ {
+  "input": {
+   "vibration": 2.511,
+   "pressure": 89.379,
+   "temperature": 82.71,
+   "flow_rate": 26.098
+  },
+  "risk": 0.6193,
+  "rul": 51.3
+ }
+]

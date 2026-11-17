@@ -1,0 +1,12 @@
+{
+  "name": "pump-analysis",
+  "version": "1.0.0",
+  "description": "Fault detection and remaining useful life estimation for centrifugal pumps",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "test": "node tests/api.test.js",
+    "train": "python backend/train.py"
+  },
+  "engines": { "node": ">=18" }
+}

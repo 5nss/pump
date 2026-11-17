@@ -1,0 +1,72 @@
+{
+ "model_version": "2026.11-rf30",
+ "horizon_hours": 48,
+ "data": {
+  "pumps": 60,
+  "train_pumps": 48,
+  "test_pumps": 12,
+  "train_rows": 12343,
+  "test_rows": 2977,
+  "at_risk_share_test": 0.1,
+  "reading_every_hours": 2
+ },
+ "classifier": {
+  "model": {
+   "precision": 0.719,
+   "recall": 0.966,
+   "f1": 0.825,
+   "accuracy": 0.959,
+   "tp": 287,
+   "fp": 112,
+   "fn": 10,
+   "tn": 2568
+  },
+  "rules_baseline": {
+   "precision": 0.354,
+   "recall": 1.0,
+   "f1": 0.523,
+   "accuracy": 0.818,
+   "tp": 297,
+   "fp": 542,
+   "fn": 0,
+   "tn": 2138
+  },
+  "importances": {
+   "vibration": 0.453,
+   "pressure": 0.246,
+   "temperature": 0.284,
+   "flow_rate": 0.017
+  }
+ },
+ "regressor": {
+  "mae_hours": 64.6,
+  "rmse_hours": 86.4,
+  "r2": 0.727,
+  "mae_hours_last_150h": 28.7,
+  "importances": {
+   "vibration": 0.922,
+   "pressure": 0.047,
+   "temperature": 0.017,
+   "flow_rate": 0.014
+  }
+ },
+ "rules": {
+  "vibration": [
+   ">",
+   1.5
+  ],
+  "pressure": [
+   "<",
+   85.0
+  ],
+  "temperature": [
+   ">",
+   85.0
+  ],
+  "flow_rate": [
+   "<",
+   25.0
+  ]
+ },
+ "note": "Simulated run-to-failure data. Scores come from pumps held out of training."
+}

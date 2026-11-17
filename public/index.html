@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pump Analysis</title>
+<meta name="description" content="Fault detection and remaining useful life estimation for centrifugal pumps, served by a random forest API.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Pump Analysis</h1>
+      <p class="sub">Predicts when a centrifugal pump will fail. Two random forests read vibration, pressure, temperature and flow, and an API returns the failure risk and the hours of useful life left.</p>
+    </div>
+    <div id="backend" class="backend" role="status" aria-live="polite"><span class="dot"></span><span id="backendText">Connecting to backend</span></div>
+  </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <a href="#diagnose" data-tab="diagnose">Diagnose</a>
+    <a href="#lifecycle" data-tab="lifecycle">Lifecycle</a>
+    <a href="#model" data-tab="model">Model</a>
+    <a href="#bench" data-tab="bench">Bench data</a>
+  </nav>
+
+  <!-- DIAGNOSE -->
+  <main>
+  <section id="diagnose" class="view">
+    <div class="grid two">
+      <div class="panel">
+        <h2>Sensor reading</h2>
+        <div class="presets">
+          <button type="button" data-preset="new">New pump</button>
+          <button type="button" data-preset="mid">Mid-life</button>
+          <button type="button" data-preset="late">Wearing out</button>
+          <button type="button" id="rand">Random</button>
+        </div>
+        <div id="controls"></div>
+      </div>
+      <div class="panel result">
+        <h2>Model verdict</h2>
+        <div id="verdict" class="verdict healthy"><span class="dot"></span><span id="verdictText">Healthy</span></div>
+        <div class="rul"><span id="rulNum">0</span><span class="unit">hours of life left</span></div>
+        <div class="rulsub" id="rulSub"></div>
+        <div class="gauge" aria-hidden="true"><div class="seg crit"></div><div class="seg watch"></div><div class="seg ok"></div><div id="needle" class="needle"></div></div>
+        <div class="gaugeLabels"><span>0</span><span>150 h</span><span>700 h</span></div>
+        <div class="riskrow"><span>Failure within <b id="hz">48</b> h</span><b id="riskPct">0%</b></div>
+        <div class="bar"><div id="riskBar"></div></div>
+        <div class="compare">
+          <div><span class="k">Fixed rules say</span><b id="ruleSays">No alarm</b></div>
+          <div><span class="k">Random forest says</span><b id="mlSays">Not at risk</b></div>
+        </div>
+        <details><summary>API response</summary><pre id="raw" class="raw">waiting</pre></details>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Where this reading sits</h2>
+      <p class="note">500 readings from pumps the model never saw. Colour shows the model's failure risk.</p>
+      <canvas id="fleetCanvas" width="900" height="340" aria-label="Scatter of temperature against vibration coloured by failure risk"></canvas>
+      <div class="legend"><span><i class="lo"></i>Low risk</span><span><i class="mid"></i>Rising</span><span><i class="hi"></i>High risk</span><span><i class="ring"></i>Your reading</span></div>
+    </div>
+  </section>
+
+  <!-- LIFECYCLE -->
+  <section id="lifecycle" class="view" hidden>
+    <div class="panel">
+      <div class="rowhead">
+        <div><h2>Run to failure</h2><p class="note">Three pumps held out of training. The model sees one reading at a time and has no idea how old the pump is.</p></div>
+        <label class="sel">Pump <select id="pumpSel"></select></label>
+      </div>
+      <canvas id="rulCanvas" width="900" height="320" aria-label="Actual and predicted remaining useful life over time"></canvas>
+      <div class="legend"><span><i class="act"></i>Actual life left</span><span><i class="pred"></i>Model estimate</span><span><i class="band"></i>Last 48 h</span></div>
+      <div class="scrub">
+        <label for="scrub">Pump age <b id="ageOut"></b></label>
+        <input id="scrub" type="range" min="0" max="100" value="0">
+      </div>
+      <div class="statrow" id="scrubStats"></div>
+    </div>
+    <div class="grid two">
+      <div class="panel"><h2>Alarm timing</h2><div id="timing"></div></div>
+      <div class="panel"><h2>Sensor drift</h2><canvas id="sensorCanvas" width="520" height="260" aria-label="Sensor readings over the pump's life"></canvas><div class="legend" id="sensorLegend"></div></div>
+    </div>
+  </section>
+
+  <!-- MODEL -->
+  <section id="model" class="view" hidden>
+    <div class="cards" id="cards"></div>
+    <div class="grid two">
+      <div class="panel"><h2>Model against fixed rules</h2><p class="note">Same held-out readings, same question: is failure within 48 hours?</p><div class="scroll"><table id="cmp"></table></div></div>
+      <div class="panel"><h2>What the model looks at</h2><p class="note">Share of decisions driven by each sensor.</p><div id="imp"></div></div>
+    </div>
+    <div class="panel"><h2>How it was built</h2><div id="how" class="how"></div></div>
+  </section>
+
+  <!-- BENCH -->
+  <section id="bench" class="view" hidden>
+    <div class="grid two">
+      <div class="panel"><h2>Bench test runs</h2><p class="note">Nine measured runs of the demo pump.</p><div class="scroll"><table id="tbl"></table></div></div>
+      <div class="panel"><h2>Efficiency against flow</h2><canvas id="benchCanvas" width="520" height="340" aria-label="Pump efficiency against discharge"></canvas></div>
+    </div>
+  </section>
+  </main>
+
+  <footer>Pump Analysis. Readings are simulated run-to-failure data, so scores show the method works, not how a specific real pump will behave.</footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
